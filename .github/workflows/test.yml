@@ -1,0 +1,58 @@
+name: Tests
+on: workflow_dispatch
+
+jobs:
+  blackbox:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        nodever: ["12", "14", "16"]
+
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.nodever }}
+
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: yarn
+      - name: Build Packages
+        run: yarn build
+      - name: Prepare for Blackbox
+        run: yarn blackbox-prepare
+      - name: Build Tests
+        run: docker-compose -f blackbox/docker-compose.yml build --parallel
+      - name: Run Tests
+        run: docker-compose -f blackbox/docker-compose.yml up --exit-code-from test-runner
+      - name: Print Docker Logs
+        if: always()
+        run: docker-compose -f blackbox/docker-compose.yml logs
+    
+  prettier:
+	@@ -43,12 +48,17 @@
+        run: yarn prettier:check
+
+  unittest:
+
+    strategy:
+      matrix:
+        nodever: ["12", "14", "16"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.nodever }}
+
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: yarn
+      - name: Build
+        run: yarn build
+          
+      - name: Test
+        run: yarn test
