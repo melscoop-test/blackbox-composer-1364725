@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+    test-runner:
+        build: ./test-runner
+        ports:
+            - 55551:55551
+            - 55550:55550
+            - 55549:55549
+        environment:
+            CONFIG_SERVER_PORT: 55551
+            FAKE_COLLECTOR_PORT: 55550
+            FAKE_LIVE_FLOWS_PORT: 55549
+            TEST_SERVICE_URL: http://target-service:55552
+            LOCAL_TEST_SERVICE_URL: http://target-service-local:55552
+            COLLECTOR_URL: http://test-runner:55550/v1/trace
+
+    target-service:
+        build: ./target-service
+        ports:
+            - 55552:55552
+        environment:
+            ASPECTO_CONFIG_HOST: http://test-runner:55551
+            PORT: 55552
+            ASPECTO_AUTH: target-service
+            ASPECTO_TRACE_EXPORT_JSON: 'true'
+            LOCAL_MODE: 'false'
+            NODE_ENV: cool-env
+
+    target-service-local:
+        build: ./target-service
+        ports:
+            - 55553:55552
+        environment:
+            ASPECTO_CONFIG_HOST: http://test-runner:55551
+            ASPECTO_LIVE_FLOWS_URL: http://test-runner:55549
+            PORT: 55552
+            ASPECTO_AUTH: target-service-local
+            ASPECTO_TRACE_EXPORT_JSON: 'true'
+            LOCAL_MODE: 'true'
