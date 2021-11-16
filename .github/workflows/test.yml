@@ -30,9 +30,9 @@ jobs:
         if: always()
         run: docker-compose -f blackbox/docker-compose.yml logs
     
-  prettier:
-	@@ -43,12 +48,17 @@
-        run: yarn prettier:check
+#  prettier:
+#	@@ -43,12 +48,17 @@
+#        run: yarn prettier:check
 
   unittest:
 
